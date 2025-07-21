@@ -108,7 +108,7 @@ const Index = () => {
   };
 
   return (
-    <div className={`min-h-screen theme-transition ${incognitoMode ? 'bg-gradient-to-br from-background via-muted/30 to-secondary/20' : 'bg-background'}`}>
+    <div className={`min-h-screen theme-transition ${incognitoMode ? 'incognito-mode' : 'bg-background'}`}>
       <Header
         language={language}
         onLanguageChange={handleLanguageChange}
@@ -126,26 +126,31 @@ const Index = () => {
             {/* Логотип */}
             <div className="text-center mb-16 space-y-6">
               <div 
-                className="logo-animation cursor-pointer"
+                className="logo-animation cursor-pointer hover-lift"
                 onClick={handleLogoClick}
               >
-                <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-primary via-accent to-primary rounded-full flex items-center justify-center shadow-2xl">
+                <div className={`w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-primary via-accent to-primary rounded-full flex items-center justify-center shadow-2xl hover-glow ${incognitoMode ? 'animate-pulse-glow' : ''}`}>
                   <span className="text-4xl font-bold text-white">@</span>
                 </div>
               </div>
               
               <div className="space-y-3">
-                <h1 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                <h1 className={`text-6xl md:text-7xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent ${incognitoMode ? 'animate-gradient-shift' : ''}`}>
                   {texts[language].title}
                 </h1>
-                <p className="text-xl text-muted-foreground max-w-md mx-auto">
+                <p className={`text-xl max-w-md mx-auto ${incognitoMode ? 'text-white/80' : 'text-muted-foreground'}`}>
                   {texts[language].subtitle}
+                  {incognitoMode && (
+                    <span className="block text-sm mt-2 text-white/60">
+                      {language === 'ru' ? 'Режим инкогнито активен' : 'Incognito mode active'}
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
 
             {/* Поисковая строка */}
-            <div className="w-full max-w-4xl mb-16">
+            <div className={`w-full max-w-4xl mb-16 ${incognitoMode ? 'incognito-search rounded-xl p-4' : ''}`}>
               <SearchBox
                 language={language}
                 onSearch={handleSearch}
@@ -154,30 +159,32 @@ const Index = () => {
             </div>
 
             {/* Быстрые ссылки */}
-            <QuickLinks language={language} />
+            <div className={incognitoMode ? 'incognito-card rounded-xl p-6' : ''}>
+              <QuickLinks language={language} />
+            </div>
 
             {/* Подпись автора */}
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-              <p className="text-sm text-muted-foreground flex items-center gap-2">
+              <p className={`text-sm flex items-center gap-2 ${incognitoMode ? 'text-white/70' : 'text-muted-foreground'}`}>
                 <span>{texts[language].author}</span>
-                <span className="text-xs bg-primary/10 px-2 py-1 rounded-full">
-                  v1.0
+                <span className="text-xs bg-primary/20 px-2 py-1 rounded-full">
+                  v2.0
                 </span>
               </p>
             </div>
           </div>
         ) : (
-          <div className="container mx-auto px-4 py-8">
+          <div className={`container mx-auto px-4 py-8 ${incognitoMode ? 'incognito-mode min-h-screen' : ''}`}>
             {/* Компактная поисковая строка */}
             <div className="mb-8">
               <div className="flex items-center gap-4 mb-6">
                 <button
                   onClick={handleLogoClick}
-                  className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hover:scale-105 transition-transform"
+                  className={`text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hover:scale-105 transition-transform ${incognitoMode ? 'hover-glow' : ''}`}
                 >
                   Amanda
                 </button>
-                <div className="flex-1 max-w-2xl">
+                <div className={`flex-1 max-w-2xl ${incognitoMode ? 'incognito-search rounded-xl p-2' : ''}`}>
                   <SearchBox
                     language={language}
                     onSearch={handleSearch}
@@ -188,11 +195,13 @@ const Index = () => {
             </div>
 
             {/* Результаты поиска */}
-            <SearchResults
-              query={searchQuery}
-              type={searchType}
-              language={language}
-            />
+            <div className={incognitoMode ? 'incognito-card rounded-xl p-6' : ''}>
+              <SearchResults
+                query={searchQuery}
+                type={searchType}
+                language={language}
+              />
+            </div>
           </div>
         )}
       </main>

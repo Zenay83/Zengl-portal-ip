@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Clock, Globe, Image as ImageIcon, Loader2 } from "lucide-react";
+import { ExternalLink, Clock, MonitorSpeaker, Images, Loader2, Download, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface SearchResult {
@@ -90,29 +90,18 @@ export const SearchResults = ({ query, type, language }: SearchResultsProps) => 
         ];
         setResults(mockWebResults);
       } else {
-        const mockImageResults: ImageResult[] = [
-          {
-            title: `${searchQuery} image 1`,
-            url: `https://picsum.photos/800/600?random=1`,
-            thumbnailUrl: `https://picsum.photos/200/150?random=1`,
-            size: '800 × 600',
-            source: 'picsum.photos'
-          },
-          {
-            title: `${searchQuery} image 2`,
-            url: `https://picsum.photos/800/600?random=2`,
-            thumbnailUrl: `https://picsum.photos/200/150?random=2`,
-            size: '800 × 600',
-            source: 'picsum.photos'
-          },
-          {
-            title: `${searchQuery} image 3`,
-            url: `https://picsum.photos/800/600?random=3`,
-            thumbnailUrl: `https://picsum.photos/200/150?random=3`,
-            size: '800 × 600',
-            source: 'picsum.photos'
-          }
-        ];
+        // Генерируем больше разнообразных изображений для демонстрации
+        const imageCategories = ['technology', 'nature', 'people', 'food', 'architecture', 'animals'];
+        const randomCategory = imageCategories[Math.floor(Math.random() * imageCategories.length)];
+        
+        const mockImageResults: ImageResult[] = Array.from({ length: 12 }, (_, i) => ({
+          title: `${searchQuery} ${randomCategory} image ${i + 1}`,
+          url: `https://picsum.photos/800/600?random=${Date.now() + i}`,
+          thumbnailUrl: `https://picsum.photos/300/200?random=${Date.now() + i}`,
+          size: `${800 + (i * 100)} × ${600 + (i * 75)}`,
+          source: ['unsplash.com', 'pexels.com', 'pixabay.com', 'freepik.com'][Math.floor(Math.random() * 4)]
+        }));
+        
         setResults(mockImageResults);
       }
 
@@ -174,9 +163,9 @@ export const SearchResults = ({ query, type, language }: SearchResultsProps) => 
     <div className="space-y-6">
       <div className="flex items-center gap-2 px-4">
         {type === 'web' ? (
-          <Globe className="h-5 w-5 text-primary" />
+          <MonitorSpeaker className="h-5 w-5 text-primary" />
         ) : (
-          <ImageIcon className="h-5 w-5 text-primary" />
+          <Images className="h-5 w-5 text-primary" />
         )}
         <h2 className="text-lg font-semibold">
           {type === 'web' ? texts[language].webResults : texts[language].imageResults}

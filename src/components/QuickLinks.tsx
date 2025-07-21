@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Youtube, BookOpen, Music, Github, Twitter, Instagram } from "lucide-react";
+import { Youtube, BookOpen, Music, Github, Twitter, Instagram, Zap, Camera } from "lucide-react";
 
 interface QuickLinksProps {
   language: 'ru' | 'en';

@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Image, Globe, Clock } from "lucide-react";
+import { Search, Images, MonitorSpeaker, Clock, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface SearchBoxProps {
@@ -129,9 +129,9 @@ export const SearchBox = ({ language, onSearch, incognitoMode }: SearchBoxProps)
                   className="w-full text-left p-2 hover:bg-muted rounded-md transition-colors flex items-center gap-3"
                 >
                   {item.type === 'images' ? (
-                    <Image className="h-4 w-4 text-muted-foreground" />
+                    <Images className="h-4 w-4 text-muted-foreground" />
                   ) : (
-                    <Globe className="h-4 w-4 text-muted-foreground" />
+                    <MonitorSpeaker className="h-4 w-4 text-muted-foreground" />
                   )}
                   <span className="flex-1 truncate">{item.query}</span>
                   <span className="text-xs text-muted-foreground">
@@ -148,11 +148,11 @@ export const SearchBox = ({ language, onSearch, incognitoMode }: SearchBoxProps)
       <Tabs value={searchType} onValueChange={(value) => setSearchType(value as 'web' | 'images')} className="w-full">
         <TabsList className="grid w-full grid-cols-2 bg-muted/50">
           <TabsTrigger value="web" className="data-[state=active]:bg-background">
-            <Globe className="h-4 w-4 mr-2" />
+            <MonitorSpeaker className="h-4 w-4 mr-2" />
             {texts[language].web}
           </TabsTrigger>
           <TabsTrigger value="images" className="data-[state=active]:bg-background">
-            <Image className="h-4 w-4 mr-2" />
+            <Images className="h-4 w-4 mr-2" />
             {texts[language].images}
           </TabsTrigger>
         </TabsList>

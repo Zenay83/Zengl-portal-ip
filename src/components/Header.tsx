@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Globe, Moon, Sun, User, Shield, Menu } from "lucide-react";
+import { Languages, Moon, Sun, LogIn, LogOut, Eye, EyeOff, Menu, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface HeaderProps {
@@ -89,7 +89,7 @@ export const Header = ({
             onClick={() => onLanguageChange(language === 'ru' ? 'en' : 'ru')}
             title={texts[language].language}
           >
-            <Globe className="h-4 w-4" />
+            <Languages className="h-4 w-4" />
           </Button>
 
           {/* Переключатель темы */}
@@ -108,7 +108,7 @@ export const Header = ({
             onClick={handleIncognitoToggle}
             title={texts[language].incognito}
           >
-            <Shield className="h-4 w-4" />
+            {incognitoMode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </Button>
 
           {/* Аутентификация */}
@@ -118,7 +118,7 @@ export const Header = ({
             onClick={onAuthToggle}
             className="ml-2"
           >
-            <User className="h-4 w-4 mr-2" />
+            {isLoggedIn ? <LogOut className="h-4 w-4 mr-2" /> : <LogIn className="h-4 w-4 mr-2" />}
             {isLoggedIn ? texts[language].logout : texts[language].login}
           </Button>
         </div>
