@@ -162,7 +162,7 @@ export const AuthModal = ({ isOpen, onClose, onAuthSuccess, language }: AuthModa
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Amanda
+            zengl
           </DialogTitle>
         </DialogHeader>
 

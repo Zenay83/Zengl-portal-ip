@@ -25,9 +25,9 @@ const Index = () => {
 
   // Загрузка настроек из localStorage
   useEffect(() => {
-    const savedLanguage = localStorage.getItem('amanda-language') as 'ru' | 'en';
-    const savedDarkMode = localStorage.getItem('amanda-dark-mode') === 'true';
-    const savedIncognito = localStorage.getItem('amanda-incognito') === 'true';
+    const savedLanguage = localStorage.getItem('zengl-language') as 'ru' | 'en';
+    const savedDarkMode = localStorage.getItem('zengl-dark-mode') === 'true';
+    const savedIncognito = localStorage.getItem('zengl-incognito') === 'true';
 
     if (savedLanguage) setLanguage(savedLanguage);
     if (savedDarkMode) setDarkMode(savedDarkMode);
@@ -41,17 +41,17 @@ const Index = () => {
     } else {
       document.documentElement.classList.remove('dark');
     }
-    localStorage.setItem('amanda-dark-mode', darkMode.toString());
+    localStorage.setItem('zengl-dark-mode', darkMode.toString());
   }, [darkMode]);
 
   // Сохранение языка
   useEffect(() => {
-    localStorage.setItem('amanda-language', language);
+    localStorage.setItem('zengl-language', language);
   }, [language]);
 
   // Сохранение режима инкогнито
   useEffect(() => {
-    localStorage.setItem('amanda-incognito', incognitoMode.toString());
+    localStorage.setItem('zengl-incognito', incognitoMode.toString());
   }, [incognitoMode]);
 
   const handleLanguageChange = (lang: 'ru' | 'en') => {
@@ -80,12 +80,12 @@ const Index = () => {
 
   const texts = {
     ru: {
-      title: 'Amanda Search',
+      title: 'zengl',
       subtitle: 'Найди своё в интернете',
       author: 'Создано для поиска'
     },
     en: {
-      title: 'Amanda Search',
+      title: 'zengl',
       subtitle: 'Find yours on the internet',
       author: 'Created for search'
     }
@@ -176,7 +176,7 @@ const Index = () => {
                   onClick={handleLogoClick}
                   className={`text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hover:scale-105 transition-transform ${incognitoMode ? 'hover-glow' : ''}`}
                 >
-                  Amanda
+                  zengl
                 </button>
                 <div className={`flex-1 max-w-2xl ${incognitoMode ? 'incognito-search rounded-xl p-2' : ''}`}>
                   <SearchBox

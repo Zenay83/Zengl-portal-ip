@@ -169,7 +169,7 @@ export function Auth() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-primary">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl gradient-text">Amanda Search</CardTitle>
+          <CardTitle className="text-2xl gradient-text">zengl</CardTitle>
           <CardDescription>Войдите или создайте аккаунт</CardDescription>
         </CardHeader>
         <CardContent>

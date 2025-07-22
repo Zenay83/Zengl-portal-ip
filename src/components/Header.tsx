@@ -83,7 +83,7 @@ export const Header = ({
         {/* Центр - логотип (скрыт на мобильных) */}
         <div className="hidden md:block">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Amanda
+            zengl
           </h1>
         </div>
 
