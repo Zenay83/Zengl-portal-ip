@@ -1,37 +1,37 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { SearchBox } from "@/components/SearchBox";
 import { SearchResults } from "@/components/SearchResults";
 import { QuickLinks } from "@/components/QuickLinks";
-import { AuthModal } from "@/components/AuthModal";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [language, setLanguage] = useState<'ru' | 'en'>('ru');
   const [darkMode, setDarkMode] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userEmail, setUserEmail] = useState('');
   const [incognitoMode, setIncognitoMode] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState<'web' | 'images'>('web');
   const [showResults, setShowResults] = useState(false);
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
 
   // Загрузка настроек из localStorage
   useEffect(() => {
     const savedLanguage = localStorage.getItem('amanda-language') as 'ru' | 'en';
     const savedDarkMode = localStorage.getItem('amanda-dark-mode') === 'true';
-    const savedUser = localStorage.getItem('amanda-user');
     const savedIncognito = localStorage.getItem('amanda-incognito') === 'true';
 
     if (savedLanguage) setLanguage(savedLanguage);
     if (savedDarkMode) setDarkMode(savedDarkMode);
     if (savedIncognito) setIncognitoMode(savedIncognito);
-    
-    if (savedUser) {
-      const userData = JSON.parse(savedUser);
-      setIsLoggedIn(true);
-      setUserEmail(userData.email);
-    }
   }, []);
 
   // Применение темной темы
@@ -62,22 +62,6 @@ const Index = () => {
     setDarkMode(!darkMode);
   };
 
-  const handleAuthToggle = () => {
-    if (isLoggedIn) {
-      setIsLoggedIn(false);
-      setUserEmail('');
-      localStorage.removeItem('amanda-user');
-    } else {
-      setShowAuthModal(true);
-    }
-  };
-
-  const handleAuthSuccess = (email: string) => {
-    setIsLoggedIn(true);
-    setUserEmail(email);
-    localStorage.setItem('amanda-user', JSON.stringify({ email }));
-    setShowAuthModal(false);
-  };
 
   const handleIncognitoToggle = () => {
     setIncognitoMode(!incognitoMode);
@@ -107,18 +91,28 @@ const Index = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect to auth
+  }
+
   return (
     <div className={`min-h-screen theme-transition ${incognitoMode ? 'incognito-mode' : 'bg-background'}`}>
-      <Header
-        language={language}
-        onLanguageChange={handleLanguageChange}
-        darkMode={darkMode}
-        onThemeToggle={handleThemeToggle}
-        isLoggedIn={isLoggedIn}
-        onAuthToggle={handleAuthToggle}
-        incognitoMode={incognitoMode}
-        onIncognitoToggle={handleIncognitoToggle}
-      />
+        <Header
+          language={language}
+          onLanguageChange={handleLanguageChange}
+          darkMode={darkMode}
+          onThemeToggle={handleThemeToggle}
+          incognitoMode={incognitoMode}
+          onIncognitoToggle={handleIncognitoToggle}
+        />
 
       <main className="pt-16">
         {!showResults ? (
@@ -206,13 +200,6 @@ const Index = () => {
         )}
       </main>
 
-      {/* Модал аутентификации */}
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onAuthSuccess={handleAuthSuccess}
-        language={language}
-      />
     </div>
   );
 };

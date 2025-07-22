@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Languages, Moon, Sun, LogIn, LogOut, Eye, EyeOff, Menu, Zap } from "lucide-react";
+import { Languages, Moon, Sun, LogIn, LogOut, Eye, EyeOff, Menu, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   language: 'ru' | 'en';
   onLanguageChange: (lang: 'ru' | 'en') => void;
   darkMode: boolean;
   onThemeToggle: () => void;
-  isLoggedIn: boolean;
-  onAuthToggle: () => void;
   incognitoMode: boolean;
   onIncognitoToggle: () => void;
 }
@@ -19,12 +19,12 @@ export const Header = ({
   onLanguageChange,
   darkMode,
   onThemeToggle,
-  isLoggedIn,
-  onAuthToggle,
   incognitoMode,
   onIncognitoToggle
 }: HeaderProps) => {
   const { toast } = useToast();
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const texts = {
@@ -53,6 +53,14 @@ export const Header = ({
         (language === 'ru' ? 'Поиск не сохраняется в истории' : 'Search history is not saved'),
       duration: 3000,
     });
+  };
+
+  const handleAuthAction = () => {
+    if (user) {
+      signOut();
+    } else {
+      navigate("/auth");
+    }
   };
 
   return (
@@ -113,13 +121,13 @@ export const Header = ({
 
           {/* Аутентификация */}
           <Button
-            variant={isLoggedIn ? "outline" : "default"}
+            variant={user ? "outline" : "default"}
             size="sm"
-            onClick={onAuthToggle}
+            onClick={handleAuthAction}
             className="ml-2"
           >
-            {isLoggedIn ? <LogOut className="h-4 w-4 mr-2" /> : <LogIn className="h-4 w-4 mr-2" />}
-            {isLoggedIn ? texts[language].logout : texts[language].login}
+            {user ? <LogOut className="h-4 w-4 mr-2" /> : <User className="h-4 w-4 mr-2" />}
+            {user ? (profile?.display_name || texts[language].logout) : texts[language].login}
           </Button>
         </div>
       </div>
