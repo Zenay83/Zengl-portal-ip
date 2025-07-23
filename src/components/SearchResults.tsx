@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { MonitorSpeaker, Images, Loader2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { MonitorSpeaker, Images, Loader2, ExternalLink, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface SearchResultsProps {
@@ -9,30 +10,44 @@ interface SearchResultsProps {
   language: 'ru' | 'en';
 }
 
-// Объявляем глобальные типы для Google CSE
-declare global {
-  interface Window {
-    google: {
-      search: {
-        cse: {
-          element: {
-            render: (options: any) => void;
-            getElement: (tag: string) => any;
-          }
-        }
-      }
-    };
-    __gcse: {
-      parsetags: string;
-      callback: () => void;
-    };
-  }
+interface SearchResult {
+  title: string;
+  link: string;
+  snippet: string;
+  displayLink: string;
+  formattedUrl?: string;
+  pagemap?: {
+    cse_thumbnail?: Array<{
+      src: string;
+      width: string;
+      height: string;
+    }>;
+    cse_image?: Array<{
+      src: string;
+    }>;
+  };
 }
 
+interface ImageResult {
+  title: string;
+  link: string;
+  image: {
+    contextLink: string;
+    thumbnailLink: string;
+    thumbnailWidth: number;
+    thumbnailHeight: number;
+  };
+  displayLink: string;
+}
+
+const CSE_ID = 'd6e5667695c10479f';
+const API_KEY = 'AIzaSyBERT8BV6vdG3pBCJ3JJvWMj3bDr8xq3XM'; // Публичный ключ для демо
+
 export const SearchResults = ({ query, type, language }: SearchResultsProps) => {
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [imageResults, setImageResults] = useState<ImageResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [initialized, setInitialized] = useState(false);
   const { toast } = useToast();
 
   const texts = {
@@ -41,101 +56,69 @@ export const SearchResults = ({ query, type, language }: SearchResultsProps) => 
       error: 'Ошибка поиска',
       webResults: 'Результаты веб-поиска',
       imageResults: 'Результаты поиска изображений',
-      loadingSearch: 'Загрузка поисковой системы...',
-      searching: 'Поиск...'
+      searching: 'Поиск...',
+      noResults: 'Результаты не найдены',
+      visitSite: 'Перейти на сайт'
     },
     en: {
       searchingFor: 'Searching for',
       error: 'Search error',
       webResults: 'Web search results',
       imageResults: 'Image search results',
-      loadingSearch: 'Loading search engine...',
-      searching: 'Searching...'
+      searching: 'Searching...',
+      noResults: 'No results found',
+      visitSite: 'Visit site'
     }
   };
 
-  // Инициализация Google Custom Search Engine
-  const initializeGoogleCSE = () => {
-    if (window.google && window.google.search && window.google.search.cse) {
-      setInitialized(true);
-      return;
-    }
-
-    // Если Google CSE еще не загружен, ждем его загрузки
-    window.__gcse = {
-      parsetags: 'explicit',
-      callback: () => {
-        setInitialized(true);
-      }
-    };
-  };
-
-  // Выполнение поиска через Google CSE
-  const performSearch = (searchQuery: string) => {
-    if (!initialized || !window.google || !window.google.search || !window.google.search.cse) {
-      setError(texts[language].error);
-      return;
-    }
+  const performSearch = async (searchQuery: string) => {
+    if (!searchQuery.trim()) return;
 
     setLoading(true);
     setError(null);
+    setResults([]);
+    setImageResults([]);
 
     try {
-      // Очищаем предыдущие результаты
-      const resultsContainer = document.getElementById('google-search-results');
-      if (resultsContainer) {
-        resultsContainer.innerHTML = '';
+      const searchType = type === 'images' ? '&searchType=image' : '';
+      const url = `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${CSE_ID}&q=${encodeURIComponent(searchQuery)}${searchType}&lr=lang_${language}&hl=${language}`;
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
       }
 
-      // Создаем новый элемент поиска
-      window.google.search.cse.element.render({
-        div: "google-search-results",
-        tag: 'search'
-      });
+      const data = await response.json();
 
-      // Выполняем поиск
-      setTimeout(() => {
-        const searchElement = window.google.search.cse.element.getElement('search');
-        if (searchElement) {
-          searchElement.execute(searchQuery);
-        }
-        setLoading(false);
-      }, 100);
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
 
+      if (type === 'images') {
+        setImageResults(data.items || []);
+      } else {
+        setResults(data.items || []);
+      }
     } catch (err) {
+      console.error('Search error:', err);
       setError(texts[language].error);
-      setLoading(false);
       toast({
         title: texts[language].error,
         description: language === 'ru' ? 'Не удалось выполнить поиск' : 'Failed to perform search',
         variant: "destructive",
         duration: 3000,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Инициализация при монтировании компонента
   useEffect(() => {
-    initializeGoogleCSE();
-  }, []);
-
-  // Выполнение поиска при изменении запроса
-  useEffect(() => {
-    if (query && initialized) {
+    if (query) {
       performSearch(query);
     }
-  }, [query, initialized]);
-
-  if (!initialized) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 space-y-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-muted-foreground">
-          {texts[language].loadingSearch}
-        </p>
-      </div>
-    );
-  }
+  }, [query, type, language]);
 
   if (loading) {
     return (
@@ -159,6 +142,16 @@ export const SearchResults = ({ query, type, language }: SearchResultsProps) => 
     );
   }
 
+  const hasResults = type === 'images' ? imageResults.length > 0 : results.length > 0;
+
+  if (!hasResults && query) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-muted-foreground text-lg">{texts[language].noResults}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 px-4">
@@ -175,13 +168,83 @@ export const SearchResults = ({ query, type, language }: SearchResultsProps) => 
         </Badge>
       </div>
 
-      {/* Google Custom Search Results Container */}
-      <div 
-        id="google-search-results" 
-        className="w-full min-h-[400px] bg-background rounded-lg"
-      >
-        {/* Google CSE будет отрендерен здесь */}
-      </div>
+      {/* Результаты веб-поиска */}
+      {type === 'web' && (
+        <div className="space-y-4">
+          {results.map((result, index) => (
+            <Card key={index} className="p-6 hover:shadow-md transition-shadow">
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm text-muted-foreground">{result.displayLink}</span>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-primary hover:underline">
+                      <a href={result.link} target="_blank" rel="noopener noreferrer">
+                        {result.title}
+                      </a>
+                    </h3>
+                  </div>
+                  {result.pagemap?.cse_thumbnail?.[0] && (
+                    <img
+                      src={result.pagemap.cse_thumbnail[0].src}
+                      alt={result.title}
+                      className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                      loading="lazy"
+                    />
+                  )}
+                </div>
+                <p className="text-muted-foreground leading-relaxed">{result.snippet}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">{result.formattedUrl}</span>
+                  <a
+                    href={result.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline flex items-center gap-1"
+                  >
+                    {texts[language].visitSite}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Результаты поиска изображений */}
+      {type === 'images' && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {imageResults.map((result, index) => (
+            <Card key={index} className="overflow-hidden hover:shadow-md transition-shadow">
+              <div className="aspect-square relative">
+                <img
+                  src={result.image.thumbnailLink}
+                  alt={result.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
+                  <a
+                    href={result.image.contextLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white hover:text-primary transition-colors"
+                  >
+                    <ExternalLink className="h-6 w-6" />
+                  </a>
+                </div>
+              </div>
+              <div className="p-3">
+                <p className="text-sm font-medium truncate">{result.title}</p>
+                <p className="text-xs text-muted-foreground truncate">{result.displayLink}</p>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
