@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { MonitorSpeaker, Images, Loader2, ExternalLink, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SearchResultsProps {
   query: string;
@@ -40,8 +41,6 @@ interface ImageResult {
   displayLink: string;
 }
 
-const CSE_ID = 'd6e5667695c10479f';
-const API_KEY = 'AIzaSyBERT8BV6vdG3pBCJ3JJvWMj3bDr8xq3XM'; // Публичный ключ для демо
 
 export const SearchResults = ({ query, type, language }: SearchResultsProps) => {
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -80,19 +79,16 @@ export const SearchResults = ({ query, type, language }: SearchResultsProps) => 
     setImageResults([]);
 
     try {
-      const searchType = type === 'images' ? '&searchType=image' : '';
-      const url = `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${CSE_ID}&q=${encodeURIComponent(searchQuery)}${searchType}&lr=lang_${language}&hl=${language}`;
-      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
+      const { data, error } = await supabase.functions.invoke('google-search', {
+        body: {
+          query: searchQuery.trim(),
+          searchType: type,
+          language: language
+        }
+      });
 
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error.message);
+      if (error) {
+        throw new Error(error.message || 'Ошибка при вызове функции поиска');
       }
 
       if (type === 'images') {
