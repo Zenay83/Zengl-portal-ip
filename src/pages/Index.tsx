@@ -124,7 +124,7 @@ const Index = () => {
                 onClick={handleLogoClick}
               >
                 <div className={`w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-primary via-accent to-primary rounded-full flex items-center justify-center shadow-2xl hover-glow ${incognitoMode ? 'animate-pulse-glow' : ''}`}>
-                  <span className="text-4xl font-bold text-white">@</span>
+                  <span className="text-4xl font-bold text-white">☯️</span>
                 </div>
               </div>
               
